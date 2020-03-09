@@ -36,7 +36,7 @@ def thread_detail(request, thread_id,
         form = MessageReplyForm(request.POST, user=request.user, thread=thread)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse("messages_inbox"))
+            return HttpResponseRedirect(reverse("messages:inbox"))
     else:
         form = MessageReplyForm(user=request.user, thread=thread)
         thread.userthread_set.filter(user=request.user).update(unread=False)
@@ -99,4 +99,4 @@ def thread_delete(request, thread_id):
     except GroupMemberThread.DoesNotExist:
         # user is not part of any groups that are in the discussion
         pass
-    return HttpResponseRedirect(reverse("messages_inbox"))
+    return HttpResponseRedirect(reverse("messages:inbox"))

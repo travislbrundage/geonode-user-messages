@@ -85,7 +85,7 @@ class ViewsTestCase(Base):
                         autospec=True) as mock_thread:
             mock_thread.objects.sorted_active_threads.return_value = []
             mock_thread.objects.sorted_unread_threads.return_value = []
-            response = self.client.get(reverse("messages_inbox"))
+            response = self.client.get(reverse("messages:inbox"))
             self.assertEqual(response.status_code, 200)
             mock_thread.objects.sorted_active_threads.assert_called_with(
                 self.first_user)
@@ -94,14 +94,14 @@ class ViewsTestCase(Base):
         with mock.patch("user_messages.views.MessageReplyForm",
                         autospec=True) as MockForm:
             response = self.client.get(
-                reverse("messages_thread_detail", args=(self.thread.id,)))
+                reverse("messages:thread_detail", args=(self.thread.id,)))
             MockForm.assert_called_with(user=self.user, thread=self.thread)
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.context["form"], MockForm.return_value)
 
     def test_thread_detail_get_existing_thread_sets_unread_to_false(self):
         self.client.get(
-            reverse("messages_thread_detail", args=(self.thread.id,)))
+            reverse("messages:thread_detail", args=(self.thread.id,)))
         user_thread = self.thread.userthread_set.get(user=self.user)
         self.assertFalse(user_thread.unread)
 
@@ -115,17 +115,17 @@ class ViewsTestCase(Base):
                         autospec=True) as MockForm:
             MockForm.return_value.is_valid.return_value = True
             response = self.client.post(
-                reverse("messages_thread_detail", args=(self.thread.id,)),
+                reverse("messages:thread_detail", args=(self.thread.id,)),
                 data=post_data,
             )
             MockForm.assert_called_with(
                 mock_post_querydict, user=self.user, thread=self.thread)
             self.assertTrue(MockForm.return_value.is_valid.called)
             self.assertTrue(MockForm.return_value.save.called)
-            self.assertRedirects(response, reverse("messages_inbox"))
+            self.assertRedirects(response, reverse("messages:inbox"))
 
     def test_message_create_no_args_get_renders(self):
-        response = self.client.get(reverse("message_create_multiple"))
+        response = self.client.get(reverse("messages:create_multiple"))
         self.assertEqual(response.status_code, 200)
 
     def test_message_create_post(self):
@@ -138,7 +138,7 @@ class ViewsTestCase(Base):
             "content": test_content,
         }
         response = self.client.post(
-            reverse("message_create_multiple"),
+            reverse("messages:create_multiple"),
             data=post_data
         )
         new_thread = models.Thread.objects.get(subject=test_subject)
@@ -149,14 +149,14 @@ class ViewsTestCase(Base):
     def test_thread_delete_single_user(self):
         response = self.client.post(
             reverse(
-                "messages_thread_delete",
+                "messages:thread_delete",
                 kwargs={"thread_id": self.thread.id}
             )
         )
         user_thread = models.UserThread.objects.get(
             thread=self.thread, user=self.user)
         self.assertEqual(user_thread.deleted, True)
-        self.assertRedirects(response, reverse("messages_inbox"))
+        self.assertRedirects(response, reverse("messages:inbox"))
 
     def test_thread_delete_group_member(self):
         self.client.logout()
@@ -164,7 +164,7 @@ class ViewsTestCase(Base):
                           password=self.user_password)
         response = self.client.post(
             reverse(
-                "messages_thread_delete",
+                "messages:thread_delete",
                 kwargs={"thread_id": self.second_thread.id}
             )
         )
@@ -174,4 +174,4 @@ class ViewsTestCase(Base):
             group=self.second_group
         )
         self.assertEqual(groupmember_thread.deleted, True)
-        self.assertRedirects(response, reverse("messages_inbox"))
+        self.assertRedirects(response, reverse("messages:inbox"))

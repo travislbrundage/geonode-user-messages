@@ -28,7 +28,7 @@ class MessageTestCase(TestCase):
     def test_get_absolute_url(self):
         abs_url = self.first_message_to_single_user.get_absolute_url()
         expected = reverse(
-            "messages_thread_detail",
+            "messages:thread_detail",
             kwargs={
                 "thread_id": self.first_message_to_single_user.thread.id
             }

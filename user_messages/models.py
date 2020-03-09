@@ -35,7 +35,7 @@ class Thread(models.Model):
     objects = ThreadManager()
 
     def get_absolute_url(self):
-        return reverse("messages_thread_detail", kwargs={"thread_id": self.pk})
+        return reverse("messages:thread_detail", kwargs={"thread_id": self.pk})
 
     @property
     @cached_attribute
@@ -74,7 +74,7 @@ class Thread(models.Model):
 class GroupMemberThread(models.Model):
     thread = models.ForeignKey(Thread, on_delete=models.CASCADE)
     # we could replace ``group`` and ``user`` below with
-    # ``member=models.ForeignKey(geonode.groups.models.GroupMember)``
+    # ``member=models.ForeignKey(geonode.groups.models.GroupMember, on_delete=models.CASCADE)``
     # but that would mean importing from geonode core apps inside an external
     # app. This is an argument for moving this app into genode.contrib
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
